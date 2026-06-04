@@ -1,0 +1,7 @@
+{
+  "bell":   { "category": "master", "sounds": [ "mre:bell" ] },
+  "bubble": { "category": "master", "sounds": [ "mre:bubble" ] },
+  "hit1":   { "category": "master", "sounds": [ "mre:hit1" ] },
+  "hit2":   { "category": "master", "sounds": [ "mre:hit2" ] },
+  "bonk":   { "category": "master", "sounds": [ "mre:bonk" ] }
+}

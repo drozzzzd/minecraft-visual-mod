@@ -1,0 +1,29 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "powder.client.mixins",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "events.MixinRender2D",
+    "events.MixinKeyboard",
+    "minecraft.EffectIconMixin"
+  ],
+  "client": [
+    "events.MixinRender2D",
+    "events.MixinKeyboard",
+    "events.MixinRender3D",
+    "events.MixinTickPlayer",
+    "minecraft.EffectIconMixin",
+    "minecraft.MixinInGameHud",
+    "minecraft.MixinBossBarHud",
+    "minecraft.MixinBlockOutline",
+    "minecraft.MixinAttack",
+    "minecraft.MixinChatScreen",
+    "minecraft.MixinHeldItemRenderer",
+    "minecraft.MixinSwingDuration",
+    "minecraft.MixinSky"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

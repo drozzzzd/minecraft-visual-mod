@@ -1,0 +1,34 @@
+# Build output
+build/
+out/
+
+# Gradle
+.gradle/
+
+# Decompiled Minecraft sources (huge, for local reference only)
+_pulse_src/
+
+# Logs
+.logs/
+*.log
+
+# IDE
+.idea/
+*.iml
+*.ipr
+*.iws
+.vscode/
+
+# OS
+*.tmp
+Thumbs.db
+.DS_Store
+
+# Run directory
+run/
+
+# stray artifacts
+torov-visual-refmap.json
+fabric.mixin.refmap.json
+.gradle.7z
+*.7z
