@@ -6,6 +6,7 @@ import powder.client.addon.addons.movement.AutoSprint;
 import powder.client.addon.addons.player.HitSound;
 import powder.client.addon.addons.visual.BlockOverlay;
 import powder.client.addon.addons.visual.ChinaHat;
+import powder.client.addon.addons.visual.CustomHand;
 import powder.client.addon.addons.visual.CustomSky;
 import powder.client.addon.addons.visual.Gamma;
 import powder.client.addon.addons.visual.HitboxCustomizer;
@@ -68,6 +69,7 @@ public class AddonSystem {
         this.addons.add(new BlockOverlay());
         this.addons.add(new WorldParticles());
         this.addons.add(new HitboxCustomizer());
+        this.addons.add(new CustomHand());
     }
 
     public List<Addon> getModules() {
