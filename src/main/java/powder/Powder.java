@@ -11,6 +11,7 @@ import powder.api.event.EventSystem;
 import powder.api.java.MethodSystem;
 import powder.api.render.msdf.MsdfFont;
 import powder.client.addon.AddonSystem;
+import powder.client.config.ConfigManager;
 import powder.client.handler.Keyboard;
 import powder.launch.startup.ClientInitializer;
 import powder.launch.startup.Protection;
@@ -42,6 +43,8 @@ public class Powder implements ClientInitializer {
 
                 EventSystem.register(new Keyboard());
                 LOGGER.info("Init: {}", "events were successfully initialized!");
+
+                ConfigManager.init();
             });
 
             LOGGER.info("Init: {}", "initialization completed (" + executionClient + "ms)");

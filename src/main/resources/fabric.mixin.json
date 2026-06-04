@@ -18,6 +18,7 @@
     "minecraft.MixinBossBarHud",
     "minecraft.MixinBlockOutline",
     "minecraft.MixinGameRenderer",
+    "minecraft.MixinClientPlayNetworkHandler",
     "minecraft.MixinAttack",
     "minecraft.MixinChatScreen",
     "minecraft.MixinHeldItemRenderer",
