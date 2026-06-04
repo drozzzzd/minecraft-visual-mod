@@ -23,6 +23,11 @@ public class HotKeys extends HudElement {
     }
 
     @Override
+    public boolean movable() {
+        return true;
+    }
+
+    @Override
     public boolean visible() {
         return !keysList.isEmpty() || PlayerIntersectionUtil.isChat(mc.currentScreen);
     }

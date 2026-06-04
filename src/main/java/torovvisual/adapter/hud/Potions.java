@@ -26,6 +26,11 @@ public class Potions extends HudElement {
     }
 
     @Override
+    public boolean movable() {
+        return true;
+    }
+
+    @Override
     public boolean visible() {
         return !list.isEmpty() || PlayerIntersectionUtil.isChat(mc.currentScreen);
     }

@@ -41,13 +41,13 @@ public final class WorldParticles extends Addon {
     @IWidget public final SliderWidget size      = new SliderWidget(1, 30);   // /10 -> 0.1..3.0
     @IWidget public final SliderWidget speed     = new SliderWidget(0, 30);   // /100 upward drift
     @IWidget public final SliderWidget spawnArea  = new SliderWidget(4, 48);   // radius around player
-    @IWidget public final SliderWidget mode       = new SliderWidget(0, 1);    // 2 modes: 0 = star1, 1 = star2
+    @IWidget public final SliderWidget mode       = new SliderWidget(0, 1);    // 2 modes: 0 = star, 1 = dollar
     @IWidget public final CheckBoxWidget clientColor = new CheckBoxWidget("Client color");
 
     // Icon-only particles (transparent background, alpha-cut from the source art).
     private static final Identifier[] TEXTURES = {
             Identifier.of("mre", "textures/particles/star1.png"),
-            Identifier.of("mre", "textures/particles/star2.png"),
+            Identifier.of("mre", "textures/particles/dollar.png"),
     };
 
     private final List<Particle> particles = new ArrayList<>();
