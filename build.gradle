@@ -17,6 +17,11 @@ repositories {
 	mavenCentral()
 }
 
+// Libraries bundled (shaded) into the final mod jar so the mod stays self-contained.
+configurations {
+	shade
+}
+
 dependencies {
 	// To change the versions see the gradle.properties file
 	minecraft "com.mojang:minecraft:${project.minecraft_version}"
@@ -30,6 +35,13 @@ dependencies {
 	// Lombok — required by the ported Torov Visual menu sources.
 	compileOnly 'org.projectlombok:lombok:1.18.34'
 	annotationProcessor 'org.projectlombok:lombok:1.18.34'
+
+	// PC media (Windows SMTC "now playing") for the Dynamic Island music widget.
+	// Compiled against, and shaded into the jar together with the Kotlin runtime it
+	// needs (the lib is Kotlin + bundles its own native MediaPlayerInfo.dll).
+	compileOnly files('libs/MediaPlayerInfo-0.1.0.jar')
+	shade files('libs/MediaPlayerInfo-0.1.0.jar')
+	shade 'org.jetbrains.kotlin:kotlin-stdlib:2.0.0'
 }
 
 processResources {
@@ -63,4 +75,10 @@ jar {
 	from("LICENSE") {
 		rename { "${it}_${project.base.archivesName.get()}"}
 	}
+
+	// Shade the media lib (+ its DLL) and the Kotlin runtime into the mod jar.
+	from {
+		configurations.shade.collect { it.isDirectory() ? it : zipTree(it) }
+	}
+	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
