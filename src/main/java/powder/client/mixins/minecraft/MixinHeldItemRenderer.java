@@ -25,7 +25,7 @@ public class MixinHeldItemRenderer {
     private void powder$handColorBegin(float tickDelta, MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers,
                                        ClientPlayerEntity player, int light, CallbackInfo ci) {
         CustomHand hand = CustomHand.INSTANCE;
-        if (hand != null && hand.isEnable()) {
+        if (hand != null && hand.isEnable() && !hand.shaderEnabled.isActive) {
             float[] c = hand.color();
             RenderSystem.setShaderColor(c[0], c[1], c[2], 1f);
         }
@@ -35,7 +35,7 @@ public class MixinHeldItemRenderer {
     private void powder$handColorEnd(float tickDelta, MatrixStack matrices, VertexConsumerProvider.Immediate vertexConsumers,
                                      ClientPlayerEntity player, int light, CallbackInfo ci) {
         CustomHand hand = CustomHand.INSTANCE;
-        if (hand != null && hand.isEnable()) {
+        if (hand != null && hand.isEnable() && !hand.shaderEnabled.isActive) {
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         }
     }
