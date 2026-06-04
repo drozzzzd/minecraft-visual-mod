@@ -44,7 +44,7 @@ public final class HitboxCustomizer extends Addon {
         this.expand.currentValue = 0f;
         this.playersOnly.isActive = true;
         this.self.isActive = false;
-        this.throughWalls.isActive = true;
+        this.throughWalls.isActive = false;
         this.clientColor.isActive = true;
         super.addWidget(this.lineWidth, this.expand, this.playersOnly, this.self, this.throughWalls, this.clientColor);
     }
