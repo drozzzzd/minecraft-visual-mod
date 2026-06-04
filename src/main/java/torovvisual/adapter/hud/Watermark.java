@@ -40,23 +40,22 @@ public class Watermark extends HudElement {
         String name = "TorovVisual 2.0" + offset;
         String fps = fpsCount + " FPS";
 
-        float padX = 7f;
-        float padY = 5f;
-        float fontHeight = font.getStringHeight(name);
+        // Proven proportions of the original watermark (font 15 / height 16 /
+        // text-y 6.5) scaled x1.2 for the bigger size-18 font, so the text sits
+        // visually centered (MSDF glyph cells are taller than the ink, so a fixed
+        // tuned baseline centers far better than auto height + symmetric padding).
+        float padX = 6f;
+        setHeight(19);
+        setWidth((int) (font.getStringWidth(name + fps) + 11));
 
-        // Size the panel to the text + symmetric padding so the text always sits
-        // perfectly centered (equal space above and below).
-        setHeight((int) (fontHeight + padY * 2));
-        setWidth((int) (font.getStringWidth(name + fps) + padX * 2));
-
-        float textY = getY() + padY;
+        float textY = getY() + 7.8f;
         float nameWidth = font.getStringWidth(name);
 
         blur.render(ShapeProperties.create(matrix, getX(), getY(), getWidth(), getHeight())
                 .round(4).softness(1).thickness(2).outlineColor(ColorUtil.getOutline()).color(ColorUtil.getRect(0.7F)).build());
         font.drawGradientString(matrix, name, getX() + padX, textY, ColorUtil.fade(0), ColorUtil.fade(100));
         font.drawString(matrix, fps, getX() + padX + nameWidth, textY, ColorUtil.getText());
-        rectangle.render(ShapeProperties.create(matrix, getX() + padX + nameWidth - 4, getY() + padY, 0.5F, fontHeight)
+        rectangle.render(ShapeProperties.create(matrix, getX() + padX + nameWidth - 3, getY() + 5, 0.5F, getHeight() - 10)
                 .color(ColorUtil.getOutline(0.75F, 0.5f)).build());
     }
 }
