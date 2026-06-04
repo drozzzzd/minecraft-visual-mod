@@ -3,10 +3,15 @@ package torovvisual.implement.screens.menu.components.implement.other;
 import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.client.gui.DrawContext;
+import net.minecraft.client.util.math.MatrixStack;
 import ru.kotopushka.compiler.sdk.annotations.Compile;
 import ru.kotopushka.compiler.sdk.annotations.Initialization;
 import torovvisual.api.feature.module.ModuleCategory;
+import torovvisual.api.system.font.Fonts;
+import torovvisual.api.system.shape.ShapeProperties;
+import torovvisual.common.util.color.ColorUtil;
 import torovvisual.common.util.entity.PlayerInventoryComponent;
+import torovvisual.common.util.math.MathUtil;
 import torovvisual.implement.screens.menu.MenuScreen;
 import torovvisual.implement.screens.menu.components.AbstractComponent;
 import torovvisual.implement.screens.menu.components.implement.category.CategoryComponent;
@@ -19,6 +24,14 @@ import java.util.List;
 @Accessors(chain = true)
 public class CategoryContainerComponent extends AbstractComponent {
     private final List<CategoryComponent> categoryComponents = new ArrayList<>();
+
+    // Theme section: client/GUI colour swatches (red, blue, green, white).
+    private static final int[] THEME_COLORS = {0xFFFF5555, 0xFF5599FF, 0xFF55FF77, 0xFFFFFFFF};
+    private static final float SWATCH = 13f, SWATCH_GAP = 17f;
+
+    private float themeRowY() {
+        return y + 50 + categoryComponents.size() * 19f + 19f;
+    }
 
 
     @Compile
@@ -43,6 +56,20 @@ public class CategoryContainerComponent extends AbstractComponent {
             component.render(context, mouseX, mouseY, delta);
             offset += component.height + 2;
         }
+
+        // Theme section (a bit below the category list).
+        MatrixStack matrix = context.getMatrices();
+        float rowY = themeRowY();
+        Fonts.getSize(12, Fonts.Type.BOLD).drawString(matrix, "Theme", x + 8, rowY - 13, 0xFFD4D6E1);
+        for (int i = 0; i < THEME_COLORS.length; i++) {
+            float sx = x + 8 + i * SWATCH_GAP;
+            boolean selected = ColorUtil.getClientColor() == THEME_COLORS[i];
+            boolean hovered = MathUtil.isHovered(mouseX, mouseY, sx, rowY, SWATCH, SWATCH);
+            rectangle.render(ShapeProperties.create(matrix, sx, rowY, SWATCH, SWATCH).round(3F)
+                    .thickness(selected ? 2F : (hovered ? 1.5F : 0F))
+                    .outlineColor(selected ? 0xFFFFFFFF : 0x80FFFFFF)
+                    .color(THEME_COLORS[i]).build());
+        }
     }
 
     @Override
@@ -56,6 +83,16 @@ public class CategoryContainerComponent extends AbstractComponent {
     
     @Override
     public boolean mouseClicked(double mouseX, double mouseY, int button) {
+        if (button == 0) {
+            float rowY = themeRowY();
+            for (int i = 0; i < THEME_COLORS.length; i++) {
+                float sx = x + 8 + i * SWATCH_GAP;
+                if (MathUtil.isHovered(mouseX, mouseY, sx, rowY, SWATCH, SWATCH)) {
+                    ColorUtil.setClientColor(THEME_COLORS[i]);
+                    return true;
+                }
+            }
+        }
         categoryComponents.forEach(categoryComponent -> categoryComponent.mouseClicked(mouseX, mouseY, button));
         return super.mouseClicked(mouseX, mouseY, button);
     }

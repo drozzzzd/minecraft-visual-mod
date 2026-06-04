@@ -14,6 +14,7 @@ import net.minecraft.text.Text;
 import powder.Powder;
 import powder.client.addon.Addon;
 import powder.client.gui.widget.Widget;
+import torovvisual.common.util.color.ColorUtil;
 import powder.client.gui.widget.widgets.CheckBoxWidget;
 import powder.client.gui.widget.widgets.SliderWidget;
 
@@ -131,11 +132,18 @@ public final class ConfigManager {
             o.add("widgets", widgets);
             root.add(addon.getName(), o);
         }
+        root.addProperty("__theme", ColorUtil.getClientColor());
         Files.writeString(path, GSON.toJson(root));
     }
 
     private static void load(Path path) throws Exception {
         JsonObject root = JsonParser.parseString(Files.readString(path)).getAsJsonObject();
+        if (root.has("__theme")) {
+            try {
+                ColorUtil.setClientColor(root.get("__theme").getAsInt());
+            } catch (Throwable ignored) {
+            }
+        }
         for (Addon addon : Powder.addonSystem.getModules()) {
             if (!root.has(addon.getName())) continue;
             JsonObject o = root.getAsJsonObject(addon.getName());

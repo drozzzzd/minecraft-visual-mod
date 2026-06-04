@@ -68,9 +68,9 @@ public class CategoryComponent extends AbstractComponent {
         drawCategoryTab(context, context.getMatrices());
 
         int[] offsets = calculateOffsets();
+        int contentHeight = Math.max(offsets[0], offsets[1]);
         int columnWidth = 137;
         int column = 0;
-        int maxScroll = 0;
         float offsetX = 84, offsetY = 29;
         scissorManager.push(positionMatrix, menuScreen.x + offsetX, menuScreen.y + offsetY, menuScreen.width - offsetX, menuScreen.height - offsetY - 1);
         for (int i = moduleComponents.size() - 1; i >= 0; i--) {
@@ -88,14 +88,15 @@ public class CategoryComponent extends AbstractComponent {
                 }
 
                 offsets[column] -= componentHeight;
-                maxScroll = Math.max(maxScroll, offsets[column]);
 
                 column = (column + 1) % 2;
             }
         }
         scissorManager.pop();
-        int clamped = MathHelper.clamp(maxScroll - (menuScreen.height / 2 - 80), 0, maxScroll);
-        scroll = MathHelper.clamp(scroll, -clamped, 0);
+        // Allow scrolling the full content height (tallest column) into view, plus a
+        // little bottom padding, so the last modules are always reachable.
+        int maxScrollDistance = Math.max(0, contentHeight - (menuScreen.height - 44));
+        scroll = MathHelper.clamp(scroll, -maxScrollDistance, 0);
         smoothedScroll = MathUtil.interpolateSmooth(2, smoothedScroll, scroll);
     }
 

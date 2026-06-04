@@ -321,6 +321,10 @@ public class ColorUtil {
         return clientColor;
     }
 
+    public void setClientColor(int color) {
+        clientColor = color;
+    }
+
     public int getClientColor(float alpha) {
         return multAlpha(getClientColor(),alpha);
     }
