@@ -9,7 +9,7 @@ import powder.api.event.EventSubscribe;
 import powder.api.event.events.EventKeyboard;
 import powder.api.handler.other.KeyboardSystem;
 import powder.client.addon.Addon;
-import torovvisual.implement.screens.menu.MenuScreen;
+import torovvisual.implement.screens.clickgui.ClickGui;
 
 public class Keyboard {
 
@@ -25,7 +25,7 @@ public class Keyboard {
         }
 
         if(this.keyboardSystem.isKeyPress(GLFW.GLFW_KEY_RIGHT_SHIFT))
-            MenuScreen.INSTANCE.openGui();
+            ClickGui.INSTANCE.openGui();
     }
 
 }

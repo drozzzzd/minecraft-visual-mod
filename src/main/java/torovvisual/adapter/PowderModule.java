@@ -93,6 +93,7 @@ public class PowderModule extends Module {
         return switch (type) {
             case HUD -> ModuleCategory.HUD;
             case VISUAL -> ModuleCategory.RENDER;
+            case MOVEMENT -> ModuleCategory.MOVEMENT;
             case UTILS, DRAG -> ModuleCategory.MISC;
         };
     }

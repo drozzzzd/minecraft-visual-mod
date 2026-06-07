@@ -1,6 +1,8 @@
 package powder.client.mixins.minecraft;
 
 import net.minecraft.client.gui.hud.InGameHud;
+import net.minecraft.client.gui.DrawContext;
+import net.minecraft.scoreboard.ScoreboardObjective;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -41,5 +43,16 @@ public class MixinInGameHud {
     @Inject(method = "renderOverlayMessage", at = @At("HEAD"), cancellable = true, require = 0)
     private void powder$hideOverlayMessage(CallbackInfo ci) {
         if (powder$customHotbar()) ci.cancel();
+    }
+
+    private static boolean powder$customScoreboard() {
+        Addon addon = Powder.addonSystem.getModulesByName("Score Board");
+        return addon != null && addon.isEnable();
+    }
+
+    @Inject(method = "renderScoreboardSidebar(Lnet/minecraft/client/gui/DrawContext;Lnet/minecraft/scoreboard/ScoreboardObjective;)V",
+            at = @At("HEAD"), cancellable = true, require = 0)
+    private void powder$hideScoreboardSidebar(DrawContext context, ScoreboardObjective objective, CallbackInfo ci) {
+        if (powder$customScoreboard()) ci.cancel();
     }
 }

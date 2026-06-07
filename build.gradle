@@ -1,3 +1,8 @@
+buildscript {
+	repositories { mavenCentral() }
+	dependencies { classpath 'com.guardsquare:proguard-gradle:7.6.1' }
+}
+
 plugins {
 	id 'fabric-loom' version '1.9-SNAPSHOT'
 }
@@ -82,3 +87,33 @@ jar {
 	}
 	duplicatesStrategy = DuplicatesStrategy.EXCLUDE
 }
+
+// ── Obfuscation ──────────────────────────────────────────────────────────────
+// Runs ProGuard on the final remapped mod jar (rename-only, see proguard.pro)
+// and replaces the artifact in place, so build/libs/<name>.jar is obfuscated.
+tasks.register('proguardJar', proguard.gradle.ProGuardTask) {
+	dependsOn tasks.named('remapJar')
+
+	def inJar = tasks.named('remapJar').get().archiveFile.get().asFile
+	def tmpJar = layout.buildDirectory.file('libs/obf-tmp.jar').get().asFile
+
+	injars inJar
+	outjars tmpJar
+
+	// Resolve everything the mod compiles/runs against as library jars so ProGuard
+	// can reason about the class hierarchy (MC, Fabric, Kotlin, Lombok, media lib).
+	libraryjars files(configurations.named('compileClasspath').get())
+	// JDK platform modules.
+	libraryjars "${System.getProperty('java.home')}/jmods/java.base.jmod"
+	libraryjars "${System.getProperty('java.home')}/jmods/java.desktop.jmod"
+	libraryjars "${System.getProperty('java.home')}/jmods/java.naming.jmod"
+
+	configuration file('proguard.pro')
+
+	doLast {
+		inJar.delete()
+		tmpJar.renameTo(inJar)
+	}
+}
+
+tasks.named('build') { finalizedBy 'proguardJar' }

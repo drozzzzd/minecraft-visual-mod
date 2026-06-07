@@ -4,41 +4,33 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.render.entity.EntityRenderer;
 import net.minecraft.client.render.entity.LivingEntityRenderer;
 import net.minecraft.client.render.entity.state.LivingEntityRenderState;
-import net.minecraft.client.texture.AbstractTexture;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.LivingEntity;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
 import net.minecraft.util.Identifier;
 import net.minecraft.util.math.MathHelper;
-import torovvisual.api.system.animation.Animation;
 import torovvisual.api.system.animation.Direction;
-import torovvisual.api.system.animation.implement.DecelerateAnimation;
-import torovvisual.api.system.font.FontRenderer;
-import torovvisual.api.system.font.Fonts;
-import torovvisual.api.system.shape.ShapeProperties;
+import torovvisual.api.system.font.RichFonts;
 import torovvisual.common.util.color.ColorUtil;
-import torovvisual.common.util.item.ItemUtil;
-import torovvisual.common.util.math.MathUtil;
-import torovvisual.common.util.other.StopWatch;
 import torovvisual.common.util.entity.PlayerIntersectionUtil;
+import torovvisual.common.util.other.StopWatch;
 import torovvisual.common.util.render.Render2DUtil;
-import torovvisual.common.util.render.ScissorManager;
-import torovvisual.core.Main;
+import torovvisual.implement.screens.clickgui.R2D;
 
-import java.util.List;
-import java.util.stream.StreamSupport;
+import java.awt.Color;
 
+/**
+ * Target info HUD restyled to Rich-Modern: gradient card, target face, name + HP
+ * string and an animated grayscale health bar (with gold absorption). MSDF fonts.
+ */
 public class TargetHud extends HudElement {
-    private final Animation animation = new DecelerateAnimation().setMs(200).setValue(1);
+
     private final StopWatch stopWatch = new StopWatch();
     private LivingEntity lastTarget;
-    private Item lastItem = Items.AIR;
-    private float health;
+    private float displayedHealth, healthAnim, absorbAnim;
+    private long lastUpdate = System.currentTimeMillis();
 
     public TargetHud() {
-        super("Target Hud", 10, 40, 100, 36);
+        super("TargetHud", 10, 40, 112, 40);
     }
 
     @Override
@@ -60,109 +52,84 @@ public class TargetHud extends HudElement {
         } else if (PlayerIntersectionUtil.isChat(mc.currentScreen)) {
             lastTarget = mc.player;
             startAnimation();
-        } else if (stopWatch.finished(500)) stopAnimation();
+        } else if (stopWatch.finished(500)) {
+            stopAnimation();
+        }
     }
 
     @Override
     public void drawDraggable(DrawContext context) {
-        if (lastTarget != null) {
-            MatrixStack matrix = context.getMatrices();
-            drawUsingItem(context, matrix);
-            drawArmor(context, matrix);
-            drawMain(context, matrix);
-            drawFace(context);
-        }
-    }
+        if (lastTarget == null) return;
+        MatrixStack matrix = context.getMatrices();
+        R2D.begin(matrix);
+        RichFonts.begin(matrix);
 
-    private void drawMain(DrawContext context, MatrixStack matrix) {
-        FontRenderer font = Fonts.getSize(18);
-        float hp = PlayerIntersectionUtil.getHealth(lastTarget);
-        float widthHp = 61;
-        String stringHp = PlayerIntersectionUtil.getHealthString(hp);
-        health = MathHelper.clamp(MathUtil.interpolateSmooth(1, health, Math.round(hp / lastTarget.getMaxHealth() * widthHp)), 2, widthHp);
+        long now = System.currentTimeMillis();
+        float dt = Math.min((now - lastUpdate) / 1000f, 0.1f);
+        lastUpdate = now;
 
-        blur.render(ShapeProperties.create(matrix, getX(), getY(), getWidth(), getHeight()).round(5).softness(1)
-                .thickness(2).outlineColor(ColorUtil.getOutline()).color(ColorUtil.getRect(0.7F)).build());
+        float x = getX(), y = getY();
+        setWidth(112);
+        setHeight(40);
 
-        if (font.getStringWidth(lastTarget.getName().getString()) > 60) {
-            ScissorManager scissorManager = Main.getInstance().getScissorManager();
-            scissorManager.push(matrix.peek().getPositionMatrix(), getX(), getY(), getWidth() - 1, getHeight());
-            font.drawGradientString(matrix, lastTarget.getName().getString(), getX() + 34, getY() + 8, ColorUtil.getText(), ColorUtil.getText(0.6F));
-            scissorManager.pop();
-        } else font.drawString(matrix, lastTarget.getName().getString(), getX() + 34, getY() + 8, ColorUtil.getText());
+        float alpha = scaleAnimation.getOutput().floatValue();
+        int a = (int) (255 * alpha);
 
-        rectangle.render(ShapeProperties.create(matrix, getX() + 34, getY() + 27F, widthHp, 2F)
-                .round(0.75F).color(0xFF060712).build());
-        rectangle.render(ShapeProperties.create(matrix, getX() + 34, getY() + 27F, health, 2F)
-                .softness(4).round(1).color(ColorUtil.roundClientColor(0.2F)).build());
-        rectangle.render(ShapeProperties.create(matrix, getX() + 34, getY() + 27F, health, 2F)
-                .round(0.75F).color(ColorUtil.roundClientColor(1)).build());
+        int[] grad = {
+                new Color(52, 52, 52, a).getRGB(), new Color(22, 22, 22, a).getRGB(),
+                new Color(52, 52, 52, a).getRGB(), new Color(22, 22, 22, a).getRGB()
+        };
+        R2D.gradientRect(x + 2, y + 2, 108, 36, grad, 6);
+        R2D.outline(x + 2, y + 2, 108, 36, 0.35f, new Color(90, 90, 90, a).getRGB(), 5);
 
-        float width = Fonts.getSize(14).getStringWidth(stringHp);
-        Fonts.getSize(14).drawString(matrix, stringHp, getX() + MathHelper.clamp(34 + health - width / 2, 34, 95 - width), getY() + 21, ColorUtil.getText());
-    }
+        drawFace(context);
 
-    private void drawArmor(DrawContext context, MatrixStack matrix) {
-        List<ItemStack> items = StreamSupport.stream(lastTarget.getEquippedItems().spliterator(), false).filter(s -> !s.isEmpty()).toList();
+        float hp = lastTarget.getHealth();
+        float maxHp = Math.max(1, lastTarget.getMaxHealth());
+        float absorp = lastTarget.getAbsorptionAmount();
 
-        if (!items.isEmpty()) {
-            float x = getX() + getWidth() / 2F - items.size() * 5.5F;
-            float y = getY() - 13;
-            float itemX = -10.5F;
+        displayedHealth = lerp(displayedHealth, hp + absorp, dt, 5f);
+        healthAnim = lerp(healthAnim, hp / maxHp, dt, 3f);
+        absorbAnim = lerp(absorbAnim, absorp / maxHp, dt, 3f);
 
-            matrix.push();
-            matrix.translate(x, y, -200);
-            blur.render(ShapeProperties.create(matrix, 0, 0, items.size() * 11, 11).round(2.5F).softness(1)
-                    .thickness(2).outlineColor(ColorUtil.getOutline()).color(ColorUtil.getRect(0.7F)).build());
+        float contentX = x + 34;
+        float nameY = y + 13;
 
-            for (ItemStack stack : items) {
-                Render2DUtil.defaultDrawStack(context, stack, itemX += 11, 0.5F, false, true, 0.5F);
-            }
-            matrix.pop();
-        }
-    }
+        RichFonts.BOLD.draw(lastTarget.getName().getString(), contentX, nameY, 5.5f, new Color(255, 255, 255, a).getRGB());
+        String hpStr = healthString(displayedHealth);
+        float hpW = RichFonts.BOLD.getWidth(hpStr, 5.5f);
+        RichFonts.BOLD.draw(hpStr, x + 112 - 10 - hpW, nameY, 5.5f, new Color(215, 215, 215, a).getRGB());
 
-    private void drawUsingItem(DrawContext context, MatrixStack matrix) {
-        animation.setDirection(lastTarget.isUsingItem() ? Direction.FORWARDS : Direction.BACKWARDS);
-        if (!lastTarget.getActiveItem().isEmpty() && lastTarget.getActiveItem().getCount() != 0) {
-            lastItem = lastTarget.getActiveItem().getItem();
-        }
-
-        if (!animation.isFinished(Direction.BACKWARDS) && !lastItem.equals(Items.AIR)) {
-            int size = 24;
-            float anim = animation.getOutput().floatValue();
-            float progress = (lastTarget.getItemUseTime() + tickCounter.getTickDelta(false)) / ItemUtil.maxUseTick(lastItem) * 360;
-
-            float x = getX() - (size + 5) * anim;
-            float y = getY() + 6;
-
-            ScissorManager scissorManager = Main.getInstance().getScissorManager();
-            scissorManager.push(matrix.peek().getPositionMatrix(), getX() - 50, getY(), 50, getHeight());
-            MathUtil.setAlpha(anim, () -> {
-                blur.render(ShapeProperties.create(matrix, x, y, size, size).round(12).softness(1)
-                        .thickness(2).outlineColor(ColorUtil.getOutline()).color(ColorUtil.getRect(0.7F)).build());
-
-                arc.render(ShapeProperties.create(matrix, x, y, size, size).round(0.4F).thickness(0.2f).end(progress)
-                        .color(ColorUtil.fade(0), ColorUtil.fade(200), ColorUtil.fade(0), ColorUtil.fade(200)).build());
-
-                Render2DUtil.defaultDrawStack(context, lastItem.getDefaultStack(), x + 3, y + 3, false, false, 1);
-            });
-            scissorManager.pop();
-        }
+        float barX = contentX, barY = nameY + 12, barW = 64, barH = 4;
+        R2D.rect(barX, barY, barW, barH, new Color(30, 30, 30, (int) (200 * alpha)).getRGB(), 2);
+        float pct = MathHelper.clamp(healthAnim, 0, 1);
+        if (pct > 0.01f) R2D.rect(barX, barY, barW * pct, barH, new Color(205, 205, 205, a).getRGB(), 2);
+        float absPct = MathHelper.clamp(absorbAnim, 0, 1);
+        if (absPct > 0.01f) R2D.rect(barX, barY, barW * absPct, barH, new Color(255, 190, 0, (int) (210 * alpha)).getRGB(), 2);
     }
 
     private void drawFace(DrawContext context) {
         EntityRenderer<? super LivingEntity, ?> baseRenderer = mc.getEntityRenderDispatcher().getRenderer(lastTarget);
-        if (!(baseRenderer instanceof LivingEntityRenderer<?, ?, ?>)) {
-            return;
-        }
+        if (!(baseRenderer instanceof LivingEntityRenderer<?, ?, ?>)) return;
 
         @SuppressWarnings("unchecked")
-        LivingEntityRenderer<LivingEntity, LivingEntityRenderState, ?> renderer = (LivingEntityRenderer<LivingEntity, LivingEntityRenderState, ?>) baseRenderer;
+        LivingEntityRenderer<LivingEntity, LivingEntityRenderState, ?> renderer =
+                (LivingEntityRenderer<LivingEntity, LivingEntityRenderState, ?>) baseRenderer;
         LivingEntityRenderState state = renderer.getAndUpdateRenderState(lastTarget, tickCounter.getTickDelta(false));
         Identifier textureLocation = renderer.getTexture(state);
-        AbstractTexture abstractTexture = mc.getTextureManager().getTexture(textureLocation);
 
-        Render2DUtil.drawTexture(context, textureLocation, getX() + 5, getY() + 5.5F, 25, 3, 8, 8, 64, ColorUtil.getRect(1), ColorUtil.multRed(-1, 1 + lastTarget.hurtTime / 4F));
+        Render2DUtil.drawTexture(context, textureLocation, getX() + 6, getY() + 8, 24, 3, 8, 8, 64,
+                ColorUtil.getRect(1), ColorUtil.multRed(-1, 1 + lastTarget.hurtTime / 4F));
+    }
+
+    private static float lerp(float current, float target, float dt, float speed) {
+        float f = (float) (1.0 - Math.pow(0.001, dt * speed));
+        return current + (target - current) * f;
+    }
+
+    private String healthString(float health) {
+        if (health >= 100) return String.valueOf((int) health);
+        if (health >= 10) return String.format("%.1f", health);
+        return String.format("%.2f", health);
     }
 }

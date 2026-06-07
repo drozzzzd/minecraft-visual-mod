@@ -8,11 +8,14 @@ import net.minecraft.text.Text;
 import net.minecraft.util.Arm;
 import torovvisual.api.system.font.FontRenderer;
 import torovvisual.api.system.font.Fonts;
+import torovvisual.api.system.font.RichFonts;
 import torovvisual.api.system.shape.ShapeProperties;
 import torovvisual.common.util.math.MathUtil;
 import torovvisual.common.util.render.Render2DUtil;
 import torovvisual.common.util.color.ColorUtil;
+import torovvisual.implement.screens.clickgui.R2D;
 
+import java.awt.Color;
 import java.util.Objects;
 import java.util.stream.IntStream;
 
@@ -31,6 +34,8 @@ public class HotBar extends HudElement {
     @Override
     public void drawDraggable(DrawContext context) {
         MatrixStack matrix = context.getMatrices();
+        R2D.begin(matrix);
+        RichFonts.begin(matrix);
         PlayerInventory inventory = Objects.requireNonNull(mc.player).getInventory();
         ItemStack offHand = mc.player.getOffHandStack();
 
@@ -38,11 +43,14 @@ public class HotBar extends HudElement {
         setX((mc.getWindow().getScaledWidth() - getWidth()) / 2);
         setY(mc.getWindow().getScaledHeight() - 27);
 
-        blur.render(ShapeProperties.create(matrix, getX() - 0.5F, getY() - 0.5F, getWidth() + 1, 23F)
-                .round(3).thickness(2).softness(1).outlineColor(ColorUtil.getOutline()).color(ColorUtil.getRect(0.7F)).build());
+        int[] grad = {
+                new Color(52, 52, 52).getRGB(), new Color(32, 32, 32).getRGB(),
+                new Color(52, 52, 52).getRGB(), new Color(32, 32, 32).getRGB()
+        };
+        R2D.gradientRect(getX() - 0.5F, getY() - 0.5F, getWidth() + 1, 23F, grad, 3);
+        R2D.outline(getX() - 0.5F, getY() - 0.5F, getWidth() + 1, 23F, 0.35f, new Color(90, 90, 90).getRGB(), 3);
 
-        rectangle.render(ShapeProperties.create(matrix, getX() + selectItemX + 1, getY() + 1, 20, 20)
-                .round(2.25F).thickness(3).outlineColor(ColorUtil.getClientColor()).color(ColorUtil.getRect(0)).build());
+        R2D.outline(getX() + selectItemX + 1, getY() + 1, 20, 20, 1.2f, new Color(255, 255, 255).getRGB(), 2.25F);
 
         IntStream.range(0, 9).forEach(i -> drawStack(context, inventory.main.get(i), getX() + i * 20 + 2, getY() + 2, false));
         if (!offHand.isEmpty()) drawStack(context, offHand, getX() + (Objects.requireNonNull(mc.player).getMainArm().equals(Arm.RIGHT) ? -28 : 198), getY() + 2, true);
@@ -51,7 +59,8 @@ public class HotBar extends HudElement {
     }
 
     public void drawExperienceBar(MatrixStack matrix) {
-        Fonts.getSize(16).drawCenteredString(matrix, mc.player.experienceLevel + "", window.getScaledWidth() / 2F, getY() - 9.5F, ColorUtil.GREEN);
+        RichFonts.begin(matrix);
+        RichFonts.BOLD.drawCentered(mc.player.experienceLevel + "", window.getScaledWidth() / 2F, getY() - 9.5F, 7, new Color(120, 255, 120).getRGB());
     }
 
     public void drawOverlayInfo(MatrixStack matrix) {

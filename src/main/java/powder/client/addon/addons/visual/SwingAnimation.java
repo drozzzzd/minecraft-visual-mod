@@ -17,7 +17,7 @@ public final class SwingAnimation extends Addon {
 
     private static final String[] MODES = {
             "Обычный", "Первый", "Второй", "Третий", "Четвертый", "Пятый",
-            "Swipe", "Down", "Smooth", "Power", "Feast", "Twist", "Spin"
+            "Swipe", "Down", "Smooth", "Smooth 2", "Power", "Feast", "Twist", "Spin", "Chop"
     };
 
     @IWidget public final SliderWidget animationMode = new SliderWidget(0, MODES.length - 1);
@@ -165,6 +165,23 @@ public final class SwingAnimation extends Addon {
                 float angle = (float) (System.currentTimeMillis() / 4L % 360L);
                 float anim = (float) Math.sin(swingProgress * (Math.PI / 2) * 2);
                 matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(angle + (40.0F + strength * 5) * anim));
+            }
+            case "Smooth 2" -> {
+                matrices.translate(i * 0.56F, -0.42F, -0.72F);
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(sin2 * -80.0F * strength));
+                matrices.translate(0, -0.1, 0);
+            }
+            case "Chop" -> {
+                matrices.translate(0.56F * i, -0.44F, -0.72F);
+                matrices.translate(0.0F, 0.33F * -0.6F, 0.0F);
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(45.0F * i));
+                matrices.multiply(RotationAxis.POSITIVE_Z.rotationDegrees(sin2 * -20.0F * i * strength));
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(sin2 * -80.0F * strength));
+                matrices.translate(0.4F, 0.2F, 0.2F);
+                matrices.translate(-0.5F, 0.08F, 0.0F);
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(20.0F));
+                matrices.multiply(RotationAxis.POSITIVE_X.rotationDegrees(-80.0F));
+                matrices.multiply(RotationAxis.POSITIVE_Y.rotationDegrees(20.0F));
             }
             default -> applyDefaultSwing(matrices, arm, swingProgress, equipProgress);
         }

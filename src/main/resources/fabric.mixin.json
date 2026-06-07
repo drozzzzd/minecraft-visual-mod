@@ -23,7 +23,8 @@
     "minecraft.MixinChatScreen",
     "minecraft.MixinHeldItemRenderer",
     "minecraft.MixinSwingDuration",
-    "minecraft.MixinSky"
+    "minecraft.MixinSky",
+    "minecraft.MixinTitleScreen"
   ],
   "injectors": {
     "defaultRequire": 1

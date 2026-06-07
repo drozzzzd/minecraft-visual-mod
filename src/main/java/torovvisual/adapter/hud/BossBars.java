@@ -4,13 +4,10 @@ import net.minecraft.client.gui.DrawContext;
 import net.minecraft.client.gui.hud.ClientBossBar;
 import net.minecraft.client.util.math.MatrixStack;
 import net.minecraft.entity.boss.BossBar;
-import org.joml.Vector4f;
-import torovvisual.api.system.font.FontRenderer;
-import torovvisual.api.system.font.Fonts;
-import torovvisual.api.system.shape.ShapeProperties;
-import torovvisual.common.util.color.ColorUtil;
+import torovvisual.api.system.font.RichFonts;
+import torovvisual.implement.screens.clickgui.R2D;
 
-import java.awt.*;
+import java.awt.Color;
 
 public class BossBars extends HudElement {
     public BossBars() {
@@ -27,21 +24,28 @@ public class BossBars extends HudElement {
         setX(mc.getWindow().getScaledWidth() / 2);
 
         MatrixStack matrix = context.getMatrices();
+        R2D.begin(matrix);
+        RichFonts.begin(matrix);
 
         float y = 10;
         float width = 156;
-        float height = 3.5F;
-        FontRenderer font = Fonts.getSize(18);
+        float height = 4F;
+
+        int[] grad = {
+                new Color(52, 52, 52).getRGB(), new Color(32, 32, 32).getRGB(),
+                new Color(52, 52, 52).getRGB(), new Color(32, 32, 32).getRGB()
+        };
 
         for (ClientBossBar bossInfo : mc.inGameHud.getBossBarHud().bossBars.values()) {
-            Vector4f rounds = bossInfo.getPercent() != 1 ? new Vector4f(0, 0, height / 2, height / 2) : new Vector4f(height / 2);
             int color = getColor(bossInfo.getColor());
+            float barX = getX() - width / 2;
 
-            rectangle.render(ShapeProperties.create(matrix, getX() - width / 2, y + 10, width, height).color(ColorUtil.getRect(0.8F)).round(1.75F).build());
-            rectangle.render(ShapeProperties.create(matrix, getX() - width / 2, y + 10, width, height).color(ColorUtil.multAlpha(color, 0.2F)).round(1.75F).build());
-            rectangle.render(ShapeProperties.create(matrix, getX() - width / 2, y + 10, width * bossInfo.getPercent(), height).color(ColorUtil.multAlpha(color, 0.8F)).round(rounds).build());
+            R2D.gradientRect(barX, y + 11, width, height, grad, height / 2);
+            R2D.rect(barX, y + 11, width * bossInfo.getPercent(), height, color, height / 2);
+            R2D.outline(barX, y + 11, width, height, 0.35f, new Color(90, 90, 90).getRGB(), height / 2);
 
-            font.drawText(matrix, bossInfo.getName(), (int) (getX() - font.getStringWidth(bossInfo.getName()) / 2), y);
+            String name = bossInfo.getName().getString();
+            RichFonts.BOLD.drawCentered(name, getX(), y, 6, new Color(255, 255, 255).getRGB());
             y += 22;
         }
     }

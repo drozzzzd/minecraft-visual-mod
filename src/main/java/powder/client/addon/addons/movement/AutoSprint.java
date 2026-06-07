@@ -14,7 +14,7 @@ public final class AutoSprint extends Addon {
     private final MinecraftClient mc = MinecraftClient.getInstance();
 
     public AutoSprint() {
-        super("AutoSprint", Type.UTILS);
+        super("AutoSprint", Type.MOVEMENT);
         INSTANCE = this;
     }
 

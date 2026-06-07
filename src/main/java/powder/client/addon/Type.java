@@ -4,5 +4,6 @@ public enum Type {
     DRAG,
     UTILS,
     HUD,
-    VISUAL
+    VISUAL,
+    MOVEMENT
 }

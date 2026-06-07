@@ -3,7 +3,9 @@ package powder.client.addon;
 import powder.api.event.EventSystem;
 import powder.api.event.events.EventModuleToggle;
 import powder.client.addon.addons.movement.AutoSprint;
-import powder.client.addon.addons.player.HitSound;
+import powder.client.addon.addons.visual.Sounds;
+import powder.client.addon.addons.visual.GlassHands;
+import powder.client.addon.addons.visual.ChunkAnimation;
 import powder.client.addon.addons.visual.BlockOverlay;
 import powder.client.addon.addons.visual.ChinaHat;
 import powder.client.addon.addons.visual.ColorCorrection;
@@ -61,7 +63,7 @@ public class AddonSystem {
 
         this.addons.add(new Gamma());
         this.addons.add(new AutoSprint());
-        this.addons.add(new HitSound());
+        this.addons.add(new Sounds());
         this.addons.add(new ChinaHat());
         this.addons.add(new CustomSky());
         this.addons.add(new JumpCircle());
@@ -69,6 +71,8 @@ public class AddonSystem {
         this.addons.add(new SwingAnimation());
         this.addons.add(new BlockOverlay());
         this.addons.add(new WorldParticles());
+        this.addons.add(new GlassHands());
+        this.addons.add(new ChunkAnimation());
         this.addons.add(new HitboxCustomizer());
         this.addons.add(new CustomHand());
         this.addons.add(new ColorCorrection());

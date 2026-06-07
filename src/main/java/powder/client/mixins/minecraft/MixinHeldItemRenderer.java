@@ -14,6 +14,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 import powder.client.addon.addons.visual.CustomHand;
+import powder.client.addon.addons.visual.GlassHands;
 import powder.client.addon.addons.visual.SwingAnimation;
 
 @Mixin(HeldItemRenderer.class)
@@ -29,6 +30,13 @@ public class MixinHeldItemRenderer {
             float[] c = hand.color();
             RenderSystem.setShaderColor(c[0], c[1], c[2], 1f);
         }
+        GlassHands glass = GlassHands.INSTANCE;
+        if (glass != null && glass.isEnable()) {
+            float[] g = glass.color();
+            RenderSystem.enableBlend();
+            RenderSystem.defaultBlendFunc();
+            RenderSystem.setShaderColor(g[0], g[1], g[2], g[3]);
+        }
     }
 
     @Inject(method = RENDER_ITEM, at = @At("RETURN"), require = 0)
@@ -36,6 +44,10 @@ public class MixinHeldItemRenderer {
                                      ClientPlayerEntity player, int light, CallbackInfo ci) {
         CustomHand hand = CustomHand.INSTANCE;
         if (hand != null && hand.isEnable() && !hand.shaderEnabled.isActive) {
+            RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
+        }
+        GlassHands glass = GlassHands.INSTANCE;
+        if (glass != null && glass.isEnable()) {
             RenderSystem.setShaderColor(1f, 1f, 1f, 1f);
         }
     }
